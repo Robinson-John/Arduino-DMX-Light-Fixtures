@@ -67,17 +67,13 @@ void handleSerial() {
             Serial.println("Error: value out of range");
             return;
         }
-        Serial.println("Parsed channel " + String(channel) + " value " + String(value)); //TODO remove
         char row = value/32; //0-7
-        Serial.println("Setting row " + String(row) + " for channel " + String(channel)); //TODO remove
 
         for (int i = 0; i < 8; i++) {
             if (i <= row && value != 0) {
                 frame[i][channel] = 1; // LED on
-                Serial.println("Frame " + String(i) + "," + String(channel) + " set to 1"); //TODO remove
             } else {
                 frame[i][channel] = 0; // LED off
-                Serial.println("Frame " + String(i) + "," + String(channel) + " set to 0"); //TODO remove
             }
         }
 

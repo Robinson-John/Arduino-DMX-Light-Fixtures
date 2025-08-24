@@ -1,8 +1,9 @@
 #define DMX_CHANNEL_START 1
 #define DMX_CHANNEL_COUNT 12
 
+#define DMX_INPUT_PIN 2
 #define NEOPIXEL_PIN 6
-#define NEOPIXEL_COUNT 30
+#define NEOPIXEL_COUNT 30  // Adjust this to the number of NeoPixels in your strip
 
 #define DMX_TIMEOUT 1000 // Timeout for DMX signal in milliseconds
 
