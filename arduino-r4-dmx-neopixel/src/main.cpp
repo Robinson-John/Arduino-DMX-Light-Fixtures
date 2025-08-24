@@ -29,12 +29,6 @@ uint8_t frame[8][12] = { //heart
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
-  
-// unsigned long frame[] = { //smily face
-//     0x19819,
-//     0x80000001,
-//     0x81f8000
-// };
 
 bool frameUpdated = true;
 

@@ -12,6 +12,3 @@
 #define COLOR_GREEN 0x00FF00
 #define COLOR_BLUE 0x0000FF
 #define COLOR_WHITE 0xFFFFFF
-
-// Function to map DMX values to NeoPixel brightness
-#define DMX_TO_BRIGHTNESS(value) ((value) * 255 / 255) // Assuming DMX value is 0-255
