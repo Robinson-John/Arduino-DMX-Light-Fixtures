@@ -14,19 +14,20 @@ void setup() {
     matrix.begin();
 
     Serial.begin(115200);
-    Serial.println("To update Matrix display send: SET <row> <column> <value>");
+    Serial.println("To update Matrix display send: SET <channel> <value>");
+    //1 channel for each column, value is how far down the row the lights go
     delay(200);
 }
 
 uint8_t frame[8][12] = { //heart
-    { 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0 },
-    { 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0 },
-    { 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0 },
-    { 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0 },
-    { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
   
 // unsigned long frame[] = { //smily face
@@ -36,9 +37,9 @@ uint8_t frame[8][12] = { //heart
 // };
 
 bool frameUpdated = true;
-int FRAME_LEN = sizeof(frame) / sizeof(frame[0]);
 
 
+//currently using serial input as proxy for dmx inputs as dmx hardware has not arrived
 void handleSerial() {
     if (!Serial.available()) return;
     String line = Serial.readStringUntil('\n');
@@ -49,32 +50,47 @@ void handleSerial() {
     char buf[64];
     line.toCharArray(buf, sizeof(buf));
 
-    // Try "SET <row> <column> <value>" or "<row> <column>"
-    int row, col;
-    char valStr[32];
-    int matched = sscanf(buf, "SET %d %d %31s", &row, &col, valStr);
-    if (matched < 3) {
-        matched = sscanf(buf, "%d %d %31s", &row, &col, valStr);
+    // Try "SET <CHANNEL> <VALUE>" 
+    int channel;
+    int value;
+    int matched = sscanf(buf, "SET %d %d", &channel, &value);
+    if (matched < 2) {
+        matched = sscanf(buf, "%d %d", &channel, &value);
     }
 
-    if (matched == 3) {
-        if (row < 0 || row >= 8 || col < 0 || col >= 12) {
-            Serial.println("Error: row/column out of range");
+    if (matched == 2) {
+        if (channel < 0 || channel >= 12) {
+            Serial.println("Error: channel out of range");
             return;
         }
-        boolean val = strtoul(valStr, NULL, 0);
-        frame[row][col] = val;
+        if (value < 0 || value > 255) {
+            Serial.println("Error: value out of range");
+            return;
+        }
+        Serial.println("Parsed channel " + String(channel) + " value " + String(value)); //TODO remove
+        char row = value/32; //0-7
+        Serial.println("Setting row " + String(row) + " for channel " + String(channel)); //TODO remove
+
+        for (int i = 0; i < 8; i++) {
+            if (i <= row && value != 0) {
+                frame[i][channel] = 1; // LED on
+                Serial.println("Frame " + String(i) + "," + String(channel) + " set to 1"); //TODO remove
+            } else {
+                frame[i][channel] = 0; // LED off
+                Serial.println("Frame " + String(i) + "," + String(channel) + " set to 0"); //TODO remove
+            }
+        }
+
         frameUpdated = true;
-        Serial.print("OK set frame[");
+        Serial.print("OK set Channel ");
+        Serial.print(channel);
+        Serial.print(" first ");
         Serial.print(row);
-        Serial.print("][");
-        Serial.print(col);
-        Serial.print("] = ");
-        Serial.println(String(frame[row][col]));
+        Serial.println(" rows.");
         return;
     }
 
-    Serial.println("Unknown command. Use: SET <row> <column> <value>  or  PRINT");
+    Serial.println("Unknown command. Use: SET <CHANNEL> <VALUE>");
 }
 
 void loop() {
