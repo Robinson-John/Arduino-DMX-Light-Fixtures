@@ -1,0 +1,5 @@
+#define DMX_CHANNEL_START 20
+#define DMX_CHANNEL_COUNT 5
+
+
+#define RING_PIN 6  
