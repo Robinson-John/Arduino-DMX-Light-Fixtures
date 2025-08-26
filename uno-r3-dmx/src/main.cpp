@@ -2,7 +2,9 @@
 #include "neopixelDriver.h"
 #include "config.h"
 
-NeoPixelDriver pixelRing(16, RING_PIN);
+NeoPixelDriver mediumRing(16, MEDIUM_RING_PIN, NEO_WGRB + NEO_KHZ800);
+NeoPixelDriver largeRing(24, LARGE_RING_PIN, NEO_GRB + NEO_KHZ800);
+NeoPixelDriver smallRing(7, SMALL_RING_PIN, NEO_WGRB + NEO_KHZ800);
 
 typedef struct {
   int channel;
@@ -38,10 +40,19 @@ DMXFrame handleSerial() {
     return DMXFrame{-1, -1};
 }
 
+void updateAllStrips(){
+  mediumRing.updateStrip();
+  largeRing.updateStrip();
+  smallRing.updateStrip();
+}
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  pixelRing.init();
+  mediumRing.init();
+  largeRing.init();
+  smallRing.init();
+
 }
 
 DMXFrame response;
@@ -55,14 +66,38 @@ void loop() {
       case 1:
         // Handle channel 1
         Serial.println("Setting DMX channel to 1 value " + String(response.value));
-        pixelRing.colorWipe(255, 50);
+        Serial.println("Setting Medium Ring");
+        mediumRing.setAllPixels(response.value);
+        Serial.println("Setting Small Ring");
+        smallRing.setAllPixels(response.value);
+        Serial.println("Setting Large Ring");
+        largeRing.setAllPixels(response.value);
+
+        delay(100);
+        updateAllStrips();
         break;
       case 2:
         // Handle channel 2
         Serial.println("Setting DMX channel to 2 value " + String(response.value));
-        pixelRing.colorWipe(response.value, 50);
+        mediumRing.colorWipe(response.value, 50);
+        smallRing.colorWipe(response.value, 50);
+        largeRing.colorWipe(response.value, 50); 
         break;
+
+      case 3:
+        // Handle channel 3
+        Serial.println("Setting DMX channel to 3 value " + String(response.value));
+        mediumRing.theaterChaseRainbow(response.value);
+        smallRing.theaterChaseRainbow(response.value);
+        largeRing.theaterChaseRainbow(response.value);
+
+        mediumRing.setAllPixels(0x000000);
+        smallRing.setAllPixels(0x000000);
+        largeRing.setAllPixels(0x000000);
+        // updateAllStrips();
     }
 
   }
+
+  delay(100);
 }

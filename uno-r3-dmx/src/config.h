@@ -2,4 +2,6 @@
 #define DMX_CHANNEL_COUNT 5
 
 
-#define RING_PIN 6  
+#define MEDIUM_RING_PIN 6  
+#define LARGE_RING_PIN 3
+#define SMALL_RING_PIN 5
