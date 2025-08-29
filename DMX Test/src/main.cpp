@@ -25,11 +25,22 @@ struct RGBVal {
 };
 
 struct RGBVal pixelVals[NUM_LEDS];
+RGBVal baseColor;
 
-uint16_t turnPos; //has to be 16 bit to simplify math later
+uint8_t turnPos; //has to be 16 bit to simplify math later
 RGBVal turnColor; // color to use for turn indicator - currently using opposite of base color
 uint8_t turnFirstPixel;
 
+RGBVal invertColor(RGBVal currentColor){
+  //currently uses inverse of base color for simplicitly, can make this more visually appealing later
+  RGBVal invertedColor;
+  
+  invertedColor.g = currentColor.r;
+  invertedColor.b = currentColor.g;
+  invertedColor.r = currentColor.b;
+
+  return invertedColor;
+}
 
 void loop() {
   // wait for an incomming DMX packet and write
@@ -40,15 +51,13 @@ void loop() {
     cli(); //turn off interrupts for processing data
 
     uint8_t *dmxBuffer = DMXSerial.getBuffer() + DMXSTART;
-    RGBVal baseColor;
 
-    for (int i = 0; i < DMXLENGTH; i++) { 
-      baseColor.r = *dmxBuffer++;
-      baseColor.g = *dmxBuffer++;
-      baseColor.b = *dmxBuffer++;
-      turnPos = *dmxBuffer++;
+    // read through DMX buffer and assign values to local variables
+    baseColor.r = *dmxBuffer++;
+    baseColor.g = *dmxBuffer++;
+    baseColor.b = *dmxBuffer++;
+    turnPos = *dmxBuffer++;
 
-    }
 
     for (int i = 0; i < NUM_LEDS; i++){ //set the array to one color to update later
       pixelVals[i] = baseColor;
@@ -56,10 +65,7 @@ void loop() {
 
     //Calculate turn Color
     if(turnPos != 0){
-      //currently uses inverse of base color for simplicitly, can make this more visually appealing later
-      turnColor.r = ~baseColor.r; 
-      turnColor.g = ~baseColor.g; 
-      turnColor.b = ~baseColor.b; 
+      turnColor = invertColor(baseColor);
 
       // turn indicator will be in a location proportional to the address 3 input
       turnFirstPixel = (turnPos * NUM_LEDS) >> 8;
@@ -67,9 +73,7 @@ void loop() {
       for (int i = 0; i < TURN_WIDTH; i++){
         pixelVals[i + turnFirstPixel] = turnColor;
       }
-
     }
-
 
     for (int p = 0; p < NUM_LEDS; p++) {
       // Map the DMX values to the LED strip
@@ -80,8 +84,7 @@ void loop() {
 
     _delay_us((RES / 1000L) + 1); //leave line low long enought for pixels to latch
     
-    digitalWrite(13, HIGH);
+    // digitalWrite(13, HIGH);
 
   }
-
 }
