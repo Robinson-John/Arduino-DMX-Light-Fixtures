@@ -140,18 +140,17 @@ void setupNeopixel() {
 // read data from the DMX buffer (RGB) and send it to the neopixels...
 void updateNeopixel(uint8_t *ptr, uint8_t pixels) {
   uint8_t  r, g, b;
-
-  // no interrupt is welcome.
-  cli();
-
   for (int p = 0; p < pixels; p++ ) {
     r = *ptr++;
     g = *ptr++;
     b = *ptr++;
+  }
+
+  // no interrupt is welcome.
+  cli();
     // send to Neopixels
     // sendPixel(r, g , b);
     sendPixel(r >> 2, g >> 2, b >> 2);
-  } // for
 
   // interrupt may come.
   sei();
